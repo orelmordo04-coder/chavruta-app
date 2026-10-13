@@ -1,0 +1,15 @@
+{
+  "name": "חברותא: לימוד תורה",
+  "short_name": "חברותא",
+  "description": "ארון הספרים, לימוד עם AI, סידור וזמני היום",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./chavruta.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101B3A",
+  "theme_color": "#101B3A",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
