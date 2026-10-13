@@ -697,7 +697,8 @@ details.card[open] summary{margin-bottom:14px}
   </section>
 </main>
 
-<footer class="foot">גרסת ניסיון · ה-AI הוא כלי עזר ללימוד ואינו פוסק הלכה; למעשה יש לשאול רב · הטקסטים מ-<a href="https://www.sefaria.org" target="_blank" rel="noopener">Sefaria.org</a>, זמני היום מ-<a href="https://www.hebcal.com" target="_blank" rel="noopener">Hebcal.com</a></footer>
+<footer class="foot">גרסת ניסיון · ה-AI הוא כלי עזר ללימוד ואינו פוסק הלכה; למעשה יש לשאול רב · הטקסטים מ-<a href="https://www.sefaria.org" target="_blank" rel="noopener">Sefaria.org</a>, זמני היום מ-<a href="https://www.hebcal.com" target="_blank" rel="noopener">Hebcal.com</a>
+  <br><a href="terms.html">תנאי שימוש</a> · <a href="privacy.html">מדיניות פרטיות</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="mailto:orelmordo04@gmail.com">יצירת קשר</a></footer>
 
 <div class="rate" id="rate" role="dialog" aria-label="דירוג האפליקציה" hidden></div>
 
@@ -1349,12 +1350,14 @@ function trackUse(){
   if(!days.includes(today)) store("chv-days", [...days, today].slice(-30));
 }
 const bump = k => store(k, (store(k)||0) + 1);
+let hasServer = false;
 function maybeAskRating(){
   const st = store("chv-rate") || {};
   if(st.done || (st.shown||0) >= 2 || Date.now() < (st.until||0)) return;
   const days = (store("chv-days")||[]).length, good = store("chv-good")||0, opened = store("chv-opened")||0;
   if(days < 3 || (good < 1 && opened < 5)) return;
-  setTimeout(()=>{ if(!$("#library").hidden && libNow()==="home" && !document.activeElement?.matches("input,textarea")) showRating(); }, 15000);
+  // ratings are kept by the app's server; on a site without one (e.g. GitHub Pages) a rating would go nowhere, so don't ask
+  setTimeout(()=>{ if(hasServer && !$("#library").hidden && libNow()==="home" && !document.activeElement?.matches("input,textarea")) showRating(); }, 15000);
 }
 function showRating(){
   const st = store("chv-rate") || {}, box = $("#rate");
@@ -1895,7 +1898,8 @@ function chvSoon(){ $("#chv-soon").hidden = false; $("#chv-filters").hidden = $(
     chvSoon();
     // outside Claude: use the app's own server (server.py) when it has an API key
     try{
-      const st = await (await fetch("/api/status")).json();
+      const st = await (await fetch("api/status")).json();
+      hasServer = true;
       if(st.ai){
         sample = serverSample; sampleState = "on";
         $(".thread-head .note").textContent = "";
