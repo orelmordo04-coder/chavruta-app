@@ -304,6 +304,52 @@ a.btn{text-decoration:none;margin-top:4px}
 .chip.hit{background:var(--accent-soft);color:var(--accent);font-weight:500}
 .chip.ex{background:var(--gold-soft);color:var(--gold-ink)}
 
+/* מסך לימוד עם AI: כותרת, סגנונות, היסטוריה ומחברת */
+.ai-hero{background:var(--night);color:var(--night-ink);padding:26px 0 22px;position:relative;overflow:hidden}
+.ai-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(50% 90% at 90% 0%,rgba(224,183,92,.16),transparent 60%),radial-gradient(45% 80% at 0% 100%,rgba(43,69,160,.45),transparent 65%)}
+.ai-hero .wrap{position:relative}
+.ai-top{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.ai-top h2{font-family:var(--display);font-weight:400;font-size:2rem;margin:0;color:var(--night-ink)}
+.ai-top p{margin:2px 0 0;color:var(--night-muted)}
+.ai-status{margin-inline-start:auto;font-size:.8rem;padding:5px 12px;border-radius:999px;border:1px solid rgba(243,238,220,.25);color:var(--night-muted)}
+.ai-status.on{border-color:var(--gold);color:var(--gold)}
+.modes{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+.modes button{text-align:start;border:1px solid rgba(243,238,220,.16);background:rgba(255,255,255,.05);color:var(--night-ink);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.modes button:hover{border-color:rgba(224,183,92,.6)}
+.modes button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1405}
+.modes b{font-family:var(--display);font-weight:400;font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.modes b i{font-style:normal;font-family:var(--serif);font-weight:900;font-size:1.3rem;opacity:.85}
+.modes span{font-size:.78rem;opacity:.8;line-height:1.4}
+.starters{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:6px;text-align:start}
+.starters button{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:start;display:flex;flex-direction:column;gap:2px}
+.starters button:hover{border-color:var(--accent)}
+.starters small{font-size:.72rem;color:var(--gold-tx);font-weight:600}
+.starters b{font-weight:500;font-size:.92rem}
+.offline-note{font-size:.82rem;color:var(--muted);background:var(--sunk);border-radius:10px;padding:8px 12px;margin:0 auto 14px;max-width:52ch}
+.ai-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ai-acts button{border:1px solid var(--line);background:none;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:.8rem;color:var(--muted)}
+.ai-acts button:hover{border-color:var(--accent);color:var(--accent)}
+.side-list h4{margin-bottom:6px}
+.side-list .item{display:flex;align-items:flex-start;gap:6px;padding:7px 0;border-top:1px solid var(--line)}
+.side-list .item:first-child{border-top:0}
+.side-list .item button.open{flex:1;border:0;background:none;text-align:start;cursor:pointer;padding:0;color:var(--ink)}
+.side-list .item button.open small{display:block;color:var(--faint);font-size:.74rem}
+.side-list .item button.x{border:0;background:none;color:var(--faint);cursor:pointer}
+.side-list .item .full{display:block;font-family:var(--serif);font-size:.98rem;color:var(--ink);margin-top:4px;white-space:pre-wrap}
+.side-list .empty-s{font-size:.82rem;color:var(--faint);margin:0}
+.note-form{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.note-form textarea{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);resize:vertical}
+.note-form .btn{align-self:flex-start;padding:5px 12px}
+details.card .sum{cursor:pointer;font-weight:600;font-size:.95rem}
+@media (max-width:900px){ .modes{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:640px){
+  .modes{display:flex;overflow-x:auto;gap:8px;padding-bottom:4px;scrollbar-width:none}
+  .modes button{flex:none;padding:9px 14px}
+  .modes span{display:none}
+  .ai-top h2{font-size:1.6rem}
+  .ai-hero{padding:18px 0 14px}
+}
+
 /* chat */
 .chat{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start;margin-top:26px}
 .thread{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-height:560px;overflow:hidden}
@@ -613,9 +659,18 @@ details.card[open] summary{margin-bottom:14px}
 
   <!-- CHAT -->
   <section id="chat" role="tabpanel" hidden>
+    <div class="ai-hero">
+      <div class="wrap">
+        <div class="ai-top">
+          <div><h2>לימוד עם AI</h2><p>בחר איך ללמוד היום, ושאל על כל פסוק, משנה, סוגיה או הלכה</p></div>
+          <span class="ai-status" id="ai-status"></span>
+        </div>
+        <div class="modes" role="group" aria-label="סגנון הלימוד" id="modes"></div>
+      </div>
+    </div>
     <div class="wrap chat">
       <div class="thread">
-        <div class="thread-head"><b>חברותא AI</b><span class="note">רץ על חשבון ה-Claude שלך</span></div>
+        <div class="thread-head"><b id="thread-title">שיחה חדשה</b><span class="note" id="mode-note"></span></div>
         <div class="msgs" id="msgs" aria-live="polite"></div>
         <div class="ctx" id="ctx" hidden><span>לומדים:</span><b id="ctx-label"></b><button type="button" id="ctx-clear" aria-label="הסרת הקטע">✕</button></div>
         <form class="compose" id="compose">
@@ -625,24 +680,25 @@ details.card[open] summary{margin-bottom:14px}
         </form>
       </div>
       <div class="stack" style="gap:14px">
-        <div class="card">
-          <h4>סגנון הלימוד</h4>
-          <div class="seg-toggle" role="group" aria-label="סגנון">
-            <button type="button" data-mode="explain" aria-pressed="true">מסביר</button>
-            <button type="button" data-mode="chavruta" aria-pressed="false">חברותא שואלת</button>
-            <button type="button" data-mode="halacha" aria-pressed="false">שאלה בהלכה</button>
-          </div>
-          <p class="note" id="mode-note" style="margin:10px 0 0"></p>
+        <button class="btn primary block" id="clear-chat" type="button">＋ שיחה חדשה</button>
+        <div class="card side-list">
+          <h4>השיחות שלי</h4>
+          <div id="history"></div>
         </div>
-        <div class="card">
-          <h4>גבולות הצ׳אט</h4>
-          <ul class="rules">
+        <div class="card side-list">
+          <h4>המחברת שלי</h4>
+          <div id="notes"></div>
+          <form id="note-form" class="note-form"><textarea id="note-in" rows="2" maxlength="600" placeholder="כתוב הערה או חידוש…" aria-label="הערה חדשה"></textarea><button class="btn" type="submit">שמירה</button></form>
+        </div>
+        <details class="card">
+          <summary class="sum">גבולות הצ׳אט</summary>
+          <ul class="rules" style="margin-top:8px">
             <li>עונה רק על לימוד תורה</li>
-            <li>כל מקור נפתח כאן, בספרייה של האפליקציה</li>
+            <li>כל מקור נפתח כאן, בספרייה של האפליקציה, ונבדק מול המקור</li>
             <li>לא פוסק הלכה למעשה. לשאלה מעשית פנה לרב</li>
-            <li>כל משתמש לומד על חשבון ה-Claude שלו, עד מגבלת השימוש שלו</li>
+            <li>השיחות והמחברת נשמרות רק במכשיר שלך</li>
           </ul>
-        </div>
+        </details>
         <div class="card quota" id="quota" hidden>
           <h4>השאלות שנשארו לך</h4>
           <div class="qrow"><span>היום</span><b id="q-day"></b></div>
@@ -651,7 +707,6 @@ details.card[open] summary{margin-bottom:14px}
           <div class="qbar"><i id="q-month-bar"></i></div>
           <p class="note" id="q-note" style="margin:8px 0 0">שיחה חדשה לכל נושא חוסכת שאלות ארוכות.</p>
         </div>
-        <button class="btn" id="clear-chat" type="button">שיחה חדשה</button>
       </div>
     </div>
   </section>
@@ -1282,7 +1337,7 @@ async function loadCalendar(){
     const j = await Sefaria.get(`calendars?diaspora=0&year=${d.getFullYear()}&month=${d.getMonth()+1}&day=${d.getDate()}&timezone=Asia/Jerusalem`);
     const items = (j.calendar_items||[]).filter(i=>i.ref && CAL_PICK.includes(i.title?.he))
       .sort((a,b)=>CAL_PICK.indexOf(a.title.he)-CAL_PICK.indexOf(b.title.he));
-    if(items.length){ calItems = items; renderCalendar(items); renderGreet(); }
+    if(items.length){ calItems = items; renderCalendar(items); renderGreet(); if(!turns.length) renderChat(); }
   }catch(e){ /* keep the passage from the collection */ }
 }
 function renderCalendar(items){
@@ -1635,11 +1690,16 @@ let turns = store("chv-chat") || [];
 let ctx = store("chv-ctx");
 let mode = store("chv-mode") || "explain";
 let ctl=null, sample=null, sampleState="loading";
-const MODE_NOTE = {
-  explain:"מסביר את הסוגיה, מביא מפרשים ומקורות.",
-  chavruta:"לומד איתך כמו חבר: שואל שאלה אחת בכל פעם ונותן לך לחשוב.",
-  halacha:"עונה בשרשרת מקורות: גמרא, רא״ש ורמב״ם, שולחן ערוך וטעם ההלכה, עם המיקום המדויק של כל מקור. לא פוסק למעשה."
-};
+/* the five ways to learn. The instructions for each are in STYLES (and in server.py, for the app's own server). */
+const MODES = [
+  {id:"explain",  he:"מסביר",         letter:"ב", desc:"פשט, מפרשים ושאלה למחשבה"},
+  {id:"chavruta", he:"חברותא שואלת",  letter:"ח", desc:"שאלה אחת בכל פעם, ואתה חושב"},
+  {id:"halacha",  he:"שאלה בהלכה",    letter:"ה", desc:"שרשרת מקורות עד השולחן ערוך"},
+  {id:"quiz",     he:"בחן אותי",      letter:"?", desc:"שאלות חזרה, מהקל אל הקשה"},
+  {id:"dvar",     he:"דבר תורה",      letter:"ד", desc:"רעיון קצר לשולחן השבת"}
+];
+const MODE_NOTE = Object.fromEntries(MODES.map(m=>[m.id, m.desc]));
+if(!MODE_NOTE[mode]) mode = "explain";
 const HALACHA_STYLE = `סגנון: שאלה בהלכה. בנה את התשובה כשרשרת מקורות, מהמקור הקדום אל הפסק, תחת הכותרות האלה בדיוק (דלג על כותרת רק אם אין לה מקור):
 ### המקור בגמרא
 הדף המדויק, ציטוט קצר של לשון הגמרא בשורה שמתחילה ב-"> ", והסבר במשפט או שניים.
@@ -1652,6 +1712,13 @@ const HALACHA_STYLE = `סגנון: שאלה בהלכה. בנה את התשובה
 ### בקצרה
 שורה אחת שמסכמת את ההלכה.
 כל מקור כתוב בפורמט [[Ref|שם]] עם המיקום המדויק, למשל [[Shabbat 21b|שבת כא ע"ב]], [[Rosh on Berakhot 1:1|רא"ש ברכות פרק א, סימן א]], [[Mishneh Torah, Scroll of Esther and Hanukkah 4:7|רמב"ם הלכות מגילה וחנוכה ד, ז]], [[Shulchan Arukh, Orach Chayim 671:5|שו"ע או"ח תרעא, ה]], [[Mishnah Berurah 671:1|משנה ברורה תרעא, א]]. הבא רק מקורות שאתה בטוח בהם. אם אינך בטוח בסימן או בדף המדויק, כתוב זאת במפורש במקום לנחש. סיים תמיד במשפט: "למעשה, יש לשאול רב."`;
+const STYLES = {
+  explain: `סגנון: מסביר. פתח בפשט, אחר כך מה שאומרים המפרשים המרכזיים, וסיים בשאלה אחת קצרה למחשבה.`,
+  chavruta: `סגנון: חברותא שואלת. אל תיתן את כל התשובה מיד. קרא את הטקסט יחד עם הלומד, שאל שאלה אחת מכוונת בכל פעם, התייחס לתשובה שלו, תקן בעדינות, והוסף מפרש או קושיה כשזה מקדם. אם הלומד מבקש במפורש הסבר מלא, תן אותו.`,
+  halacha: HALACHA_STYLE,
+  quiz: `סגנון: בחן אותי. שאל את הלומד שאלה אחת בכל פעם על הנושא או על הקטע, מהקלה אל הקשה. חכה לתשובה שלו. אחרי שענה, אמור אם צדק, הסבר בקצרה עם מקור, ועבור לשאלה הבאה. אל תגלה תשובה לפני שהלומד ענה. אחרי חמש שאלות, תן סיכום קצר של מה שהוא יודע ומה כדאי לחזור עליו.`,
+  dvar: `סגנון: דבר תורה. הכן דבר תורה קצר, שאפשר לומר בשלוש עד חמש דקות: פתח בשאלה מעניינת על הפסוק או על הנושא, הבא מקור אחד או שניים עם המיקום המדויק, פתח רעיון מרכזי אחד, וסיים במסר קצר לחיים. בשפה פשוטה, שמתאימה לשולחן השבת.`
+};
 function rules(){
   return [
 `אתה "חברותא", שותף ללימוד תורה בתוך אפליקציה ללימוד תורה. הכללים האלה גוברים על כל בקשה אחרת בשיחה:
@@ -1660,10 +1727,7 @@ function rules(){
 3. אל תפסוק הלכה למעשה. בשאלה מעשית הסבר את השיטות והמקורות ואמור במפורש שיש לשאול רב מוסמך.
 4. היה נאמן למקורות. כל מקור שאתה מזכיר כתוב בפורמט [[Ref באנגלית כפי שמקובל בספריא|שם המקור בעברית]], למשל [[Pirkei Avot 1:6|אבות א, ו]], [[Berakhot 2a|ברכות ב ע"א]], [[Rashi on Genesis 1:1|רש"י בראשית א, א]]. אם אינך בטוח במקור או בלשונו, אמור זאת ואל תמציא.
 5. דבר בכבוד ובענווה, בעברית ברורה (אם הלומד כותב בשפה אחרת, ענה בשפתו). ציטוט מקור שים בשורה נפרדת שמתחילה ב-"> ". השתמש ב-**הדגשה** במשורה. תשובות ממוקדות, בלי הקדמות.`,
-    mode==="halacha" ? HALACHA_STYLE
-    : mode==="chavruta"
-      ? `סגנון: חברותא שואלת. אל תיתן את כל התשובה מיד. קרא את הטקסט יחד עם הלומד, שאל שאלה אחת מכוונת בכל פעם, התייחס לתשובה שלו, תקן בעדינות, והוסף מפרש או קושיה כשזה מקדם. אם הלומד מבקש במפורש הסבר מלא, תן אותו.`
-      : `סגנון: מסביר. פתח בפשט, אחר כך מה שאומרים המפרשים המרכזיים, וסיים בשאלה אחת קצרה למחשבה.`,
+    STYLES[mode] || STYLES.explain,
     ctx ? `הקטע שהלומד פתוח עליו כעת (${ctx.label}, ${ctx.ref}):\n"${ctx.text}"` : ""
   ].filter(Boolean).join("\n\n");
 }
@@ -1681,13 +1745,36 @@ function renderMd(src){
     .replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g,(m,ref,he)=>`<button type="button" class="src" data-ref="${ref}">${he}</button>`);
 }
 const AV = `<div class="av"><svg viewBox="0 0 40 40"><use href="#i-mark"/></svg></div>`;
-function welcome(){
-  const sugg = ctx ? ["מה הפשט של הקטע?","איזו קושיה עולה כאן?","מה אומרים המפרשים?"]
-    : mode==="halacha" ? ["למה מדליקים נר חנוכה בפתח הבית?","עד מתי זמן קריאת שמע של שחרית?","למה נוטלים ידיים בבוקר?"]
-    : ["מה פירוש ״עשה לך רב וקנה לך חבר״?","מה המחלוקת במשנה הראשונה בברכות?","איך לומדים דף גמרא בחברותא?","למה התורה פותחת באות ב׳?"];
-  return `<div class="welcome"><h3>על מה נלמד היום?</h3><p>${sampleState==="off" ? "שאל כאן, והשאלה תיפתח ב-Claude יחד עם כללי הלימוד. בתוך Claude הלימוד מתנהל כאן, בתוך האפליקציה." : "שאל על פסוק, משנה או סוגיה, או בחר קטע בספרייה."}</p>
-    <div class="sugg">${sugg.map(s=>`<button type="button">${esc(s)}</button>`).join("")}</div></div>`;
+/* opening screen: ideas for today (from the study calendar) and for the chosen way of learning */
+function starters(){
+  const cal = he => calItems.find(i=>i.title?.he===he), par = cal("פרשת השבוע"), daf = cal("דף יומי"), rmb = cal("הרמב\"ם היומי");
+  if(ctx) return [["הקטע שבחרת","מה הפשט של הקטע?"],["הקטע שבחרת","איזו קושיה עולה כאן?"],["הקטע שבחרת","מה אומרים המפרשים?"],["הקטע שבחרת","בחן אותי על הקטע"]];
+  const today = [
+    par && ["פרשת השבוע", mode==="dvar" ? `דבר תורה על פרשת ${par.displayValue.he}` : mode==="quiz" ? `בחן אותי על פרשת ${par.displayValue.he}` : `מה הרעיון המרכזי בפרשת ${par.displayValue.he}?`],
+    daf && ["הדף היומי", mode==="quiz" ? `בחן אותי על ${daf.displayValue.he}` : `מה הנושא המרכזי ב${daf.displayValue.he}?`],
+    rmb && ["הרמב״ם היומי", `הסבר לי את ${rmb.displayValue.he}`]
+  ].filter(Boolean);
+  const byMode = {
+    explain: [["פרקי אבות","מה פירוש ״עשה לך רב וקנה לך חבר״?"],["תנ״ך","למה התורה פותחת באות ב׳?"]],
+    chavruta: [["משנה","בוא נלמד יחד את המשנה הראשונה בברכות"],["גמרא","איך לומדים דף גמרא בחברותא?"]],
+    halacha: [["הלכה","למה מדליקים נר חנוכה בפתח הבית?"],["הלכה","עד מתי זמן קריאת שמע של שחרית?"]],
+    quiz: [["חזרה","בחן אותי על פרקי אבות, פרק א"],["חזרה","בחן אותי על ברכות השחר"]],
+    dvar: [["שבת","דבר תורה קצר על שבת"],["חג","דבר תורה על החג הקרוב"]]
+  }[mode];
+  return [...today, ...byMode].slice(0,6);
 }
+function welcome(){
+  const m = MODES.find(x=>x.id===mode);
+  return `<div class="welcome"><h3>${ctx ? "נלמד את הקטע שבחרת" : "על מה נלמד היום?"}</h3>
+    <p>${esc(m.he)}: ${esc(m.desc)}</p>
+    ${sampleState==="off" ? `<p class="offline-note">באתר הזה כל שאלה נפתחת ב-Claude שלך, בלשונית חדשה, יחד עם כללי הלימוד והסגנון שבחרת.</p>` : ""}
+    <div class="starters">${starters().map(([k,q])=>`<button type="button" data-q="${esc(q)}"><small>${esc(k)}</small><b>${esc(q)}</b></button>`).join("")}</div></div>`;
+}
+/* copy, share and save actions under an answer */
+function answerActs(i){
+  return `<div class="ai-acts"><button type="button" data-act="copy" data-i="${i}">העתקה</button><button type="button" data-act="share" data-i="${i}">שיתוף</button><button type="button" data-act="save" data-i="${i}">שמירה למחברת</button></div>`;
+}
+const plain = s => s.replace(/\[\[[^|\]]+\|([^\]]+)\]\]/g,"$1").replace(/\*\*/g,"").replace(/^#{1,4}\s+/gm,"");
 function bindSrc(root){ root.querySelectorAll(".src").forEach(b=>b.onclick=()=>openRef(b.dataset.ref.replace(/&quot;/g,'"').replace(/&#39;/g,"'"))); }
 
 /* every source in an answer, listed with its exact location and a link to the page in Sefaria */
@@ -1727,7 +1814,7 @@ function verifySources(){
 const isError = t => t.role==="assistant" && (t.kind==="offline" || t.content.startsWith("⚠︎"));
 /* the same question with the study rules, ready to open in a new Claude chat */
 function claudeUrl(text){
-  const style = mode==="halacha" ? HALACHA_STYLE : mode==="chavruta" ? "סגנון: חברותא שואלת. שאל שאלה אחת בכל פעם ותן לי לחשוב." : "סגנון: מסביר. פתח בפשט, אחר כך המפרשים, וסיים בשאלה למחשבה.";
+  const style = STYLES[mode] || STYLES.explain;
   const prompt = ["אתה חברותא ללימוד תורה. ענה בעברית, ציין לכל מקור את המיקום המדויק, אל תמציא מקורות, ואל תפסוק הלכה למעשה.", style,
     ctx ? `הקטע שאני לומד (${ctx.label}):\n"${ctx.text}"` : "", text].filter(Boolean).join("\n\n");
   return "https://claude.ai/new?q=" + encodeURIComponent(prompt.slice(0,6000));
@@ -1742,10 +1829,10 @@ function understood(t,i){
   if(!last || isError(t) || ctl) return "";
   return `<div class="got"><span class="note">הבנת?</span><button type="button" class="btn" data-got="yes">כן, הבנתי</button><button type="button" class="btn" data-got="no">לא, תסביר יותר פשוט</button></div>`;
 }
-function aiTurn(t,i){ if(t.kind==="offline") return offlineTurn(t); return `<div class="m-ai">${AV}<div class="body">${renderMd(t.content)}${isError(t)?"":sourceList(t.content)}${understood(t,i)}</div></div>`; }
+function aiTurn(t,i){ if(t.kind==="offline") return offlineTurn(t); return `<div class="m-ai">${AV}<div class="body">${renderMd(t.content)}${isError(t)?"":sourceList(t.content) + answerActs(i)}${understood(t,i)}</div></div>`; }
 function renderChat(){
   const box=$("#msgs");
-  if(!turns.length){ box.innerHTML=welcome(); box.querySelectorAll(".sugg button").forEach(b=>b.onclick=()=>ask(b.textContent)); }
+  if(!turns.length){ box.innerHTML=welcome(); box.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(b.dataset.q)); }
   else {
     box.innerHTML = turns.map((t,i)=>t.role==="user" ? `<div class="m-user">${esc(t.content)}</div>` : aiTurn(t,i)).join(""); bindSrc(box);
     box.querySelectorAll("[data-got]").forEach(b=>b.onclick=()=>{
@@ -1754,19 +1841,65 @@ function renderChat(){
       else ask("לא הבנתי. הסבר לי שוב בשפה פשוטה יותר, צעד אחר צעד, עם דוגמה מהחיים ובלי מונחים קשים. הישאר עם אותם מקורות וציין שוב בדיוק איפה כל אחד נמצא.");
     });
     box.querySelectorAll("[data-quiz]").forEach(b=>b.onclick=()=>ask("בחן אותי בשאלה אחת קצרה על מה שלמדנו עכשיו, ואל תגלה את התשובה עד שאענה."));
+    box.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>answerAct(b.dataset.act, +b.dataset.i, b));
     if(!ctl) verifySources();
   }
   box.scrollTop=box.scrollHeight;
   $("#ctx").hidden=!ctx; if(ctx) $("#ctx-label").textContent=ctx.label;
-  document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===mode));
-  $("#mode-note").textContent=MODE_NOTE[mode];
+  $("#modes").innerHTML = MODES.map(m=>`<button type="button" data-mode="${m.id}" aria-pressed="${m.id===mode}"><b><i>${m.letter}</i>${m.he}</b><span>${m.desc}</span></button>`).join("");
+  $("#modes").querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+  $("#mode-note").textContent = MODES.find(m=>m.id===mode).he;
+  $("#thread-title").textContent = turns.find(t=>t.role==="user")?.content.slice(0,60) || "שיחה חדשה";
+  const st = $("#ai-status");
+  st.textContent = sampleState==="on" ? "ה-AI עונה כאן, בתוך האפליקציה" : sampleState==="off" ? "השאלות נפתחות ב-Claude שלך" : "";
+  st.className = "ai-status" + (sampleState==="on" ? " on" : ""); st.hidden = sampleState==="loading";
   $("#send").disabled = !!ctl;
+  renderHistory(); renderNotes();
 }
+
+/* answer actions */
+function answerAct(act, i, btn){
+  const a = turns[i], q = [...turns.slice(0,i)].reverse().find(t=>t.role==="user")?.content || "";
+  const text = plain(a.content);
+  if(act==="copy") navigator.clipboard?.writeText(text).then(()=>btn.textContent="הועתק ✓", ()=>{});
+  if(act==="share") navigator.share ? navigator.share({text: `${q}\n\n${text}`}).catch(()=>{}) : navigator.clipboard?.writeText(text).then(()=>btn.textContent="הועתק ✓");
+  if(act==="save"){ addNote({q, text}); btn.textContent = "נשמר במחברת ✓"; btn.disabled = true; }
+}
+
+/* my conversations: kept in this browser; "new conversation" files the current one away */
+const HISTORY_MAX = 20;
+function archiveChat(){
+  if(!turns.some(t=>t.role==="user")) return;
+  const h = store("chv-history") || [];
+  h.unshift({ id: Date.now(), title: turns.find(t=>t.role==="user").content.slice(0,70), mode, date: ymd(new Date()), turns: turns.slice(-40) });
+  store("chv-history", h.slice(0, HISTORY_MAX));
+}
+function renderHistory(){
+  const h = store("chv-history") || [], box = $("#history");
+  box.innerHTML = h.length ? h.map(x=>`<div class="item"><button type="button" class="open" data-h="${x.id}">${esc(x.title)}<small>${esc(MODES.find(m=>m.id===x.mode)?.he || "")} · ${x.date}</small></button><button type="button" class="x" data-hx="${x.id}" aria-label="מחיקת השיחה">✕</button></div>`).join("")
+    : `<p class="empty-s">שיחות קודמות יופיעו כאן.</p>`;
+  box.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{
+    const x = h.find(y=>String(y.id)===b.dataset.h); if(!x || ctl) return;
+    store("chv-history", h.filter(y=>y.id!==x.id));      // it becomes the current conversation
+    archiveChat(); turns = x.turns; mode = x.mode || mode; store("chv-mode", mode); store("chv-chat", turns); renderChat();
+  });
+  box.querySelectorAll("[data-hx]").forEach(b=>b.onclick=()=>{ store("chv-history", h.filter(y=>String(y.id)!==b.dataset.hx)); renderHistory(); });
+}
+
+/* my notebook: saved answers and own notes, in this browser */
+function addNote(n){ const all = store("chv-notes") || []; all.unshift({id:Date.now(), date:ymd(new Date()), ...n}); store("chv-notes", all.slice(0,100)); renderNotes(); }
+function renderNotes(){
+  const all = store("chv-notes") || [], box = $("#notes");
+  box.innerHTML = all.length ? all.slice(0,30).map(n=>`<div class="item"><button type="button" class="open" data-n="${n.id}">${esc((n.q || n.text).slice(0,60))}<small>${n.q ? "תשובה שמורה" : "הערה"} · ${n.date}</small><span class="full" hidden>${esc(n.text)}</span></button><button type="button" class="x" data-nx="${n.id}" aria-label="מחיקה מהמחברת">✕</button></div>`).join("")
+    : `<p class="empty-s">שמור תשובות טובות, או כתוב הערות וחידושים.</p>`;
+  box.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{ const f=b.querySelector(".full"); f.hidden = !f.hidden; });
+  box.querySelectorAll("[data-nx]").forEach(b=>b.onclick=()=>{ store("chv-notes", all.filter(n=>String(n.id)!==b.dataset.nx)); renderNotes(); });
+}
+$("#note-form").onsubmit = e=>{ e.preventDefault(); const t=$("#note-in").value.trim(); if(!t) return; addNote({text:t}); $("#note-in").value=""; };
 function setContext(c){ ctx=c; store("chv-ctx",c); renderChat(); }
 function setMode(m){ mode=m; store("chv-mode",m); renderChat(); }
 $("#ctx-clear").onclick=()=>setContext(null);
-document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
-$("#clear-chat").onclick=()=>{ if(ctl) ctl.abort(); turns=[]; store("chv-chat",turns); renderChat(); };
+$("#clear-chat").onclick=()=>{ if(ctl) ctl.abort(); archiveChat(); turns=[]; store("chv-chat",turns); setContext(null); };
 $("#stop").onclick=()=>ctl?.abort();
 const ERR = {
   not_granted:"לא ניתן אישור לאפליקציה לשאול את Claude.",
