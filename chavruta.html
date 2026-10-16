@@ -479,6 +479,7 @@ details.card[open] summary{margin-bottom:14px}
 .tips summary::-webkit-details-marker{display:none}
 .tips ul{margin:6px 0 0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px}
 .pool-note{grid-column:1/-1;text-align:center}
+.near-city{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)}
 .near{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column}
 .near li{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
 .near li:first-child{border-top:0}
@@ -764,9 +765,10 @@ details.card[open] summary{margin-bottom:14px}
         <div class="hcard" id="near-card">
           <div class="hk">מקום ללמוד</div>
           <h3>בתי כנסת ובתי מדרש קרובים</h3>
-          <p class="note">לפי המיקום שלך, מהקרוב לרחוק. המיקום משמש רק לחיפוש ולא נשמר.</p>
+          <p class="note">לפי המיקום שלך או לפי עיר, מהקרוב לרחוק. המיקום משמש רק לחיפוש ולא נשמר.</p>
           <div class="hrow">
             <button class="btn primary" type="button" id="near-go">מצא לידי</button>
+            <select id="near-city" aria-label="או חיפוש לפי עיר" class="near-city"></select>
             <a class="btn" id="bm-map" href="#" target="_blank" rel="noopener">חיפוש במפות Google ↗</a>
           </div>
           <p class="note" id="near-msg" aria-live="polite"></p>
@@ -2164,6 +2166,9 @@ function renderHub(){
     : place ? `https://www.google.com/maps/search/${encodeURIComponent("בית מדרש")}/@${place.lat},${place.lon},14z`
     : "https://www.google.com/maps/search/" + encodeURIComponent("בית מדרש");
   $("#near-go").onclick = findNear;
+  // or by city, without sharing a location: the city center, a little wider
+  $("#near-city").innerHTML = `<option value="">או בחר עיר…</option>` + CITIES.map(([n])=>`<option>${n}</option>`).join("");
+  $("#near-city").onchange = e=>{ const c = CITIES.find(([n])=>n===e.target.value); if(c) searchNear(c[1], c[2], 3000, c[0]); };
   renderPlan();
 }
 // 4b. the nearest synagogues and batei midrash, from OpenStreetMap (© OpenStreetMap contributors, ODbL).
@@ -2191,13 +2196,23 @@ function findNear(){
   const msg = $("#near-msg"), list = $("#near-list"), btn = $("#near-go");
   if(!navigator.geolocation){ msg.textContent = "המכשיר לא מאפשר לאתר מיקום. אפשר להשתמש בחיפוש במפות Google."; return; }
   btn.disabled = true; msg.textContent = "מאתר את המיקום שלך…"; list.innerHTML = "";
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const lat = +pos.coords.latitude.toFixed(3), lon = +pos.coords.longitude.toFixed(3);
-    msg.textContent = "מחפש בתי כנסת ובתי מדרש קרובים…";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    btn.disabled = false;
+    searchNear(+pos.coords.latitude.toFixed(3), +pos.coords.longitude.toFixed(3), 2000, "");
+  }, err=>{
+    btn.disabled = false;
+    msg.textContent = err.code===1 ? "לא ניתנה הרשאה למיקום. אפשר לבחור עיר מהרשימה, או לאשר מיקום בהגדרות הדפדפן." : "לא הצלחנו לאתר את המיקום. אפשר לבחור עיר מהרשימה.";
+  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
+}
+async function searchNear(lat, lon, radius, city){
+  const msg = $("#near-msg"), list = $("#near-list"), btn = $("#near-go");
+  btn.disabled = true; $("#near-city").disabled = true; list.innerHTML = ""; $("#near-credit").hidden = true;
+  {
+    msg.textContent = city ? `מחפש בתי כנסת ובתי מדרש ב${city}…` : "מחפש בתי כנסת ובתי מדרש קרובים…";
     const slow = setTimeout(()=>{ if(!list.children.length) msg.textContent = "שרתי המפה עמוסים כרגע. ממשיך לחפש, זה יכול לקחת עד חצי דקה…"; }, 7000);
     const query = r => `[out:json][timeout:20];(nwr["amenity"="place_of_worship"]["religion"="jewish"](around:${r},${lat},${lon});nwr["building"="synagogue"](around:${r},${lat},${lon}););out tags center 80;`;
     try{
-      let j = await overpass(query(2000));
+      let j = await overpass(query(radius));
       if((j.elements||[]).length < 3) j = await overpass(query(6000));      // few results nearby: look a bit further
       const seen = new Set(), rows = [];
       for(const e of j.elements || []){
@@ -2208,18 +2223,15 @@ function findNear(){
       }
       rows.sort((a,b)=>a.d-b.d);
       if(!rows.length){ msg.textContent = "לא נמצאו בתי כנסת קרובים במפה. נסה את החיפוש במפות Google."; return; }
-      msg.textContent = `נמצאו ${rows.length}. הנה הקרובים ביותר:`;
+      msg.textContent = city ? `נמצאו ${rows.length} ב${city}. הקרובים ביותר למרכז העיר:` : `נמצאו ${rows.length}. הנה הקרובים ביותר אליך:`;
       list.innerHTML = rows.slice(0,10).map(x=>`<li><span class="nm"><b>${esc(x.name || "בית כנסת")}</b><small>${esc(x.street || (x.name ? "" : "אין שם במפה"))}</small></span>
         <span class="d">${x.d < 1000 ? `${Math.round(x.d/10)*10} מ׳` : `${(x.d/1000).toFixed(1)} ק״מ`}</span>
         <a href="https://waze.com/ul?ll=${x.la},${x.lo}&navigate=yes" target="_blank" rel="noopener">Waze</a>
         <a href="https://www.google.com/maps/dir/?api=1&destination=${x.la},${x.lo}" target="_blank" rel="noopener">מפה</a></li>`).join("");
       $("#near-credit").hidden = false;
     }catch(e){ msg.textContent = "שירות המפה לא זמין כרגע. נסה שוב בעוד רגע, או השתמש בחיפוש במפות Google."; }
-    finally{ clearTimeout(slow); btn.disabled = false; }
-  }, err=>{
-    btn.disabled = false;
-    msg.textContent = err.code===1 ? "לא ניתנה הרשאה למיקום. אפשר לאשר אותה בהגדרות הדפדפן, או להשתמש בחיפוש במפות Google." : "לא הצלחנו לאתר את המיקום. נסה שוב.";
-  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
+    finally{ clearTimeout(slow); btn.disabled = false; $("#near-city").disabled = false; }
+  }
 }
 // 2. a shared study plan: the same plan for both friends through a link; each keeps his own progress
 const PLANS = [
