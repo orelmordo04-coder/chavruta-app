@@ -479,6 +479,16 @@ details.card[open] summary{margin-bottom:14px}
 .tips summary::-webkit-details-marker{display:none}
 .tips ul{margin:6px 0 0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px}
 .pool-note{grid-column:1/-1;text-align:center}
+.near{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column}
+.near li{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.near li:first-child{border-top:0}
+.near .nm{flex:1;min-width:0}
+.near .nm b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.near .nm small{color:var(--faint);font-size:.78rem}
+.near .d{font-variant-numeric:tabular-nums;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.near a{font-size:.8rem;padding:3px 9px;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--accent);white-space:nowrap}
+.near a:hover{border-color:var(--accent)}
+#near-card .credit a{color:inherit}
 .plan-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .plan-pick button{text-align:start;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;cursor:pointer}
 .plan-pick button:hover{border-color:var(--t3)}
@@ -751,11 +761,17 @@ details.card[open] summary{margin-bottom:14px}
           <button class="btn gold" type="button" id="ai-chv">התחל ללמוד בחברותא</button>
         </div>
         <!-- 4. a beit midrash nearby -->
-        <div class="hcard">
+        <div class="hcard" id="near-card">
           <div class="hk">מקום ללמוד</div>
-          <h3>בית מדרש קרוב</h3>
-          <p class="note">חיפוש במפה של בתי מדרש ובתי כנסת באזור שלך.</p>
-          <a class="btn" id="bm-map" href="#" target="_blank" rel="noopener">חפש במפה ↗</a>
+          <h3>בתי כנסת ובתי מדרש קרובים</h3>
+          <p class="note">לפי המיקום שלך, מהקרוב לרחוק. המיקום משמש רק לחיפוש ולא נשמר.</p>
+          <div class="hrow">
+            <button class="btn primary" type="button" id="near-go">מצא לידי</button>
+            <a class="btn" id="bm-map" href="#" target="_blank" rel="noopener">חיפוש במפות Google ↗</a>
+          </div>
+          <p class="note" id="near-msg" aria-live="polite"></p>
+          <ol class="near" id="near-list"></ol>
+          <p class="credit" id="near-credit" hidden>נתוני מפה © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">תורמי OpenStreetMap</a></p>
         </div>
         <!-- 5. tips -->
         <details class="hcard wide tips">
@@ -2147,7 +2163,63 @@ function renderHub(){
     ? "https://www.google.com/maps/search/" + encodeURIComponent("בית מדרש " + place.name)
     : place ? `https://www.google.com/maps/search/${encodeURIComponent("בית מדרש")}/@${place.lat},${place.lon},14z`
     : "https://www.google.com/maps/search/" + encodeURIComponent("בית מדרש");
+  $("#near-go").onclick = findNear;
   renderPlan();
+}
+// 4b. the nearest synagogues and batei midrash, from OpenStreetMap (© OpenStreetMap contributors, ODbL).
+// The location is rounded to about 100 m, sent only with the search, and not stored.
+// The free public servers are busy at times: a busy one refuses at once, a slow one may take half a minute.
+// So: each server is tried by POST and by GET, quick ones first, the slow main server last.
+const OVERPASS = [["https://overpass.kumi.systems/api/interpreter", 12000], ["https://overpass.private.coffee/api/interpreter", 12000],
+                  ["https://overpass-api.de/api/interpreter", 40000]];
+async function overpass(q){
+  for(const [url, wait] of OVERPASS){
+    for(const how of ["POST", "GET"]){
+      const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), wait);
+      try{
+        const r = how==="POST" ? await fetch(url, {method:"POST", body: new URLSearchParams({data:q}), signal: ctl.signal})
+                               : await fetch(url + "?data=" + encodeURIComponent(q), {signal: ctl.signal});
+        if(r.ok){ const j = await r.json(); if(Array.isArray(j.elements)) return j; }
+      }catch(e){}finally{ clearTimeout(t); }
+    }
+  }
+  throw new Error("unavailable");
+}
+const meters = (a, b, c, d) => { const R = 6371000, r = x=>x*Math.PI/180, dp = r(c-a), dl = r(d-b);
+  return 2*R*Math.asin(Math.sqrt(Math.sin(dp/2)**2 + Math.cos(r(a))*Math.cos(r(c))*Math.sin(dl/2)**2)); };
+function findNear(){
+  const msg = $("#near-msg"), list = $("#near-list"), btn = $("#near-go");
+  if(!navigator.geolocation){ msg.textContent = "המכשיר לא מאפשר לאתר מיקום. אפשר להשתמש בחיפוש במפות Google."; return; }
+  btn.disabled = true; msg.textContent = "מאתר את המיקום שלך…"; list.innerHTML = "";
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const lat = +pos.coords.latitude.toFixed(3), lon = +pos.coords.longitude.toFixed(3);
+    msg.textContent = "מחפש בתי כנסת ובתי מדרש קרובים…";
+    const slow = setTimeout(()=>{ if(!list.children.length) msg.textContent = "שרתי המפה עמוסים כרגע. ממשיך לחפש, זה יכול לקחת עד חצי דקה…"; }, 7000);
+    const query = r => `[out:json][timeout:20];(nwr["amenity"="place_of_worship"]["religion"="jewish"](around:${r},${lat},${lon});nwr["building"="synagogue"](around:${r},${lat},${lon}););out tags center 80;`;
+    try{
+      let j = await overpass(query(2000));
+      if((j.elements||[]).length < 3) j = await overpass(query(6000));      // few results nearby: look a bit further
+      const seen = new Set(), rows = [];
+      for(const e of j.elements || []){
+        const la = e.lat ?? e.center?.lat, lo = e.lon ?? e.center?.lon, t = e.tags || {};
+        if(la==null || seen.has(e.type+e.id)) continue; seen.add(e.type+e.id);
+        const street = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ");
+        rows.push({ d: meters(lat, lon, la, lo), la, lo, name: t["name:he"] || t.name || "", street });
+      }
+      rows.sort((a,b)=>a.d-b.d);
+      if(!rows.length){ msg.textContent = "לא נמצאו בתי כנסת קרובים במפה. נסה את החיפוש במפות Google."; return; }
+      msg.textContent = `נמצאו ${rows.length}. הנה הקרובים ביותר:`;
+      list.innerHTML = rows.slice(0,10).map(x=>`<li><span class="nm"><b>${esc(x.name || "בית כנסת")}</b><small>${esc(x.street || (x.name ? "" : "אין שם במפה"))}</small></span>
+        <span class="d">${x.d < 1000 ? `${Math.round(x.d/10)*10} מ׳` : `${(x.d/1000).toFixed(1)} ק״מ`}</span>
+        <a href="https://waze.com/ul?ll=${x.la},${x.lo}&navigate=yes" target="_blank" rel="noopener">Waze</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${x.la},${x.lo}" target="_blank" rel="noopener">מפה</a></li>`).join("");
+      $("#near-credit").hidden = false;
+    }catch(e){ msg.textContent = "שירות המפה לא זמין כרגע. נסה שוב בעוד רגע, או השתמש בחיפוש במפות Google."; }
+    finally{ clearTimeout(slow); btn.disabled = false; }
+  }, err=>{
+    btn.disabled = false;
+    msg.textContent = err.code===1 ? "לא ניתנה הרשאה למיקום. אפשר לאשר אותה בהגדרות הדפדפן, או להשתמש בחיפוש במפות Google." : "לא הצלחנו לאתר את המיקום. נסה שוב.";
+  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
 }
 // 2. a shared study plan: the same plan for both friends through a link; each keeps his own progress
 const PLANS = [
