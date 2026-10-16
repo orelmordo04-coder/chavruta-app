@@ -3,11 +3,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>חברותא</title>
-<meta name="description" content="לימוד תורה: ארון הספרים של ספריא, לימוד עם AI, סידור וזמני היום">
+<meta name="description" content="לימוד תורה: ארון הספרים, פירושים, לימוד עם AI, סידור וזמני היום">
 <meta name="theme-color" content="#101B3A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Rubik:wght@400;500;600;700&family=Suez+One&display=swap">
@@ -420,6 +420,31 @@ details.card[open] summary{margin-bottom:14px}
 .foot{max-width:1140px;margin:0 auto;padding:18px 16px 28px;text-align:center;font-size:.78rem;color:var(--faint);border-top:1px solid var(--line)}
 .foot a{color:inherit}
 @media (max-width:640px){ .foot{padding-bottom:96px} }
+/* מסך מציאת חברותא: כלים שעובדים בלי מאגר */
+.hub{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.hcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.hcard.wide{grid-column:1/-1}
+.hcard h3{font-family:var(--display);font-weight:400;font-size:1.3rem;margin:0}
+.hk{font-size:.76rem;font-weight:600;letter-spacing:.05em;color:var(--t3)}
+.hcard .note{margin:0}
+.hcard .btn{align-self:flex-start}
+.hrow{display:flex;flex-wrap:wrap;gap:8px}
+.tips summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline;font-weight:600}
+.tips summary::-webkit-details-marker{display:none}
+.tips ul{margin:6px 0 0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px}
+.pool-note{grid-column:1/-1;text-align:center}
+.plan-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.plan-pick button{text-align:start;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;cursor:pointer}
+.plan-pick button:hover{border-color:var(--t3)}
+.plan-pick b{display:block;font-family:var(--serif);font-size:1.05rem}
+.plan-pick span{font-size:.78rem;color:var(--muted)}
+.plan-days{display:flex;flex-wrap:wrap;gap:5px}
+.plan-days label{display:flex;align-items:center;justify-content:center;min-width:42px;padding:5px 6px;border:1px solid var(--line);border-radius:8px;font-size:.82rem;cursor:pointer;font-family:var(--serif);font-weight:700}
+.plan-days input{position:absolute;opacity:0;pointer-events:none}
+.plan-days label:has(input:checked){background:var(--t3);border-color:var(--t3);color:#fff}
+.plan-days label.today{outline:2px solid var(--gold);outline-offset:1px}
+.plan-days label:has(input:focus-visible){outline:2px solid var(--gold)}
+@media (max-width:640px){ .hub{grid-template-columns:1fr} }
 .soon{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--t3);border-radius:var(--r);padding:28px;text-align:center}
 .soon b{font-family:var(--display);font-weight:400;font-size:1.5rem;display:block}
 .soon p{color:var(--muted);max-width:52ch;margin:8px auto 16px}
@@ -635,12 +660,61 @@ details.card[open] summary{margin-bottom:14px}
   <section id="chv" role="tabpanel" hidden>
     <div class="wrap">
       <div class="chv-top">
-        <div><h2>מציאת חברותא</h2><p>התאמה לפי גיל, אזור, מה לומדים ומקום לימוד קרוב לשניכם</p></div>
+        <div><h2>מציאת חברותא</h2><p>הזמינו חבר, למדו יחד לפי תוכנית, ומצאו מקום ללמוד</p></div>
       </div>
-      <div class="soon" id="chv-soon" hidden>
-        <b>מאגר החברותות ייפתח בקרוב</b>
-        <p>אנחנו בונים מקום שבו תוכל למצוא חבר ללימוד באזור שלך, בגיל שלך ובנושא שמעניין אותך. בינתיים אפשר ללמוד בספרייה ועם הצ׳אט.</p>
-        <button class="btn primary" type="button" data-go="library">לספרייה</button>
+      <div class="hub" id="chv-soon" hidden>
+        <!-- 1. invite a friend -->
+        <form class="hcard wide" id="inv-form">
+          <div class="hk">הזמנה ללימוד</div>
+          <h3>הזמן חבר ללמוד איתך</h3>
+          <div class="two">
+            <div class="field"><label for="inv-what">מה לומדים</label><input id="inv-what" maxlength="80" placeholder="למשל: פרקי אבות פרק א"></div>
+            <div class="field"><label for="inv-where">איפה</label><input id="inv-where" maxlength="60" placeholder="בית מדרש, טלפון או זום"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="inv-date">תאריך</label><input id="inv-date" type="date"></div>
+            <div class="field"><label for="inv-time">שעה</label><input id="inv-time" type="time" value="20:00"></div>
+          </div>
+          <div class="hrow">
+            <button class="btn primary" type="button" id="inv-wa">שליחה בוואטסאפ</button>
+            <button class="btn" type="button" id="inv-share">שיתוף</button>
+            <button class="btn" type="button" id="inv-cal">הוספה ליומן</button>
+          </div>
+          <p class="note" id="inv-msg"></p>
+        </form>
+        <!-- 2. a shared study plan -->
+        <div class="hcard wide" id="plan-card">
+          <div class="hk">תוכנית לימוד משותפת</div>
+          <h3>לומדים יחד, כל אחד בקצב של היום</h3>
+          <div id="plan-body"></div>
+        </div>
+        <!-- 3. chavruta with AI -->
+        <div class="hcard">
+          <div class="hk">חברותא עם AI</div>
+          <h3>אין עם מי ללמוד עכשיו?</h3>
+          <p class="note">ה-AI לומד איתך כמו חבר: שואל שאלה אחת בכל פעם, ונותן לך לחשוב.</p>
+          <button class="btn gold" type="button" id="ai-chv">התחל ללמוד בחברותא</button>
+        </div>
+        <!-- 4. a beit midrash nearby -->
+        <div class="hcard">
+          <div class="hk">מקום ללמוד</div>
+          <h3>בית מדרש קרוב</h3>
+          <p class="note">חיפוש במפה של בתי מדרש ובתי כנסת באזור שלך.</p>
+          <a class="btn" id="bm-map" href="#" target="_blank" rel="noopener">חפש במפה ↗</a>
+        </div>
+        <!-- 5. tips -->
+        <details class="hcard wide tips">
+          <summary><span class="hk">טיפים</span> איך לומדים טוב בחברותא</summary>
+          <ul>
+            <li><b>קבעו זמן קבוע.</b> עדיף חצי שעה בכל שבוע באותה שעה מאשר שלוש שעות פעם בחודש.</li>
+            <li><b>קוראים בקול.</b> אחד קורא והשני עוצר ושואל. אחר כך מתחלפים.</li>
+            <li><b>שואלים "למה".</b> בכל שורה: למה נכתב כך, מה זה בא ללמד, מה הקושיה.</li>
+            <li><b>מסכמים במשפט.</b> בסוף כל קטע, כל אחד אומר במילים שלו מה למדנו.</li>
+            <li><b>לא חייבים להסכים.</b> מחלוקת לשם שמים היא חלק מהלימוד. מקשיבים ומנמקים.</li>
+            <li><b>חוזרים על מה שלמדנו.</b> בתחילת כל מפגש, חמש דקות של חזרה על הפעם הקודמת.</li>
+          </ul>
+        </details>
+        <p class="note pool-note">בקרוב: מאגר חברותות, כדי למצוא חבר ללימוד לפי אזור, גיל ונושא.</p>
       </div>
       <div class="filters" id="chv-filters">
         <label>אזור<select id="f-region"><option value="">כל האזורים</option></select></label>
@@ -698,7 +772,8 @@ details.card[open] summary{margin-bottom:14px}
 </main>
 
 <footer class="foot">גרסת ניסיון · ה-AI הוא כלי עזר ללימוד ואינו פוסק הלכה; למעשה יש לשאול רב · הטקסטים מ-<a href="https://www.sefaria.org" target="_blank" rel="noopener">Sefaria.org</a>, זמני היום מ-<a href="https://www.hebcal.com" target="_blank" rel="noopener">Hebcal.com</a>
-  <br><a href="terms.html">תנאי שימוש</a> · <a href="privacy.html">מדיניות פרטיות</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="mailto:orelmordo04@gmail.com">יצירת קשר</a></footer>
+  · האתר אינו קשור לספריא או ל-Hebcal ואינו פועל מטעמם
+  <br><a href="about.html">אודות ורישיונות</a> · <a href="terms.html">תנאי שימוש</a> · <a href="privacy.html">מדיניות פרטיות</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="mailto:orelmordo04@gmail.com">יצירת קשר</a></footer>
 
 <div class="rate" id="rate" role="dialog" aria-label="דירוג האפליקציה" hidden></div>
 
@@ -1892,7 +1967,97 @@ showTab(store("chv-tab")||"library");
 if("serviceWorker" in navigator && !window.claude && (location.protocol==="https:" || location.hostname==="localhost"))
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 /* the chavruta pool needs a shared database; until there is one, say "coming soon" instead of a form that saves nothing */
-function chvSoon(){ $("#chv-soon").hidden = false; $("#chv-filters").hidden = $("#chv-main").hidden = true; }
+function chvSoon(){ $("#chv-soon").hidden = false; $("#chv-filters").hidden = $("#chv-main").hidden = true; renderHub(); }
+
+/* ---- chavruta tools that work without a shared database ---- */
+const siteUrl = () => location.href.split("#")[0].split("?")[0];
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function copyText(t, msgEl){
+  navigator.clipboard?.writeText(t).then(()=>{ if(msgEl) msgEl.textContent = "הועתק. אפשר להדביק בכל מקום."; }, ()=>{ if(msgEl) msgEl.textContent = t; });
+}
+// 1. invite a friend: WhatsApp, share sheet, or a calendar file
+function inviteText(){
+  const what = $("#inv-what").value.trim() || "לימוד בחברותא", where = $("#inv-where").value.trim();
+  const d = $("#inv-date").value ? new Date($("#inv-date").value + "T12:00") : null;
+  const when = d ? d.toLocaleDateString("he-IL",{weekday:"long", day:"numeric", month:"long"}) : "";
+  return [`בוא נלמד יחד בחברותא!`, `מה: ${what}`, when ? `מתי: ${when}${$("#inv-time").value ? ` בשעה ${$("#inv-time").value}` : ""}` : "",
+    where ? `איפה: ${where}` : "", ``, `אפשר לפתוח את הטקסט כאן: ${siteUrl()}`].filter((x,i)=>x!=="" || i===4).join("\n");
+}
+function renderHub(){
+  const last = store("chv-last");
+  if(!$("#inv-what").value && last) $("#inv-what").value = last.title || "";
+  if(!$("#inv-date").value) $("#inv-date").value = ymd(new Date());
+  $("#inv-wa").onclick = ()=>window.open("https://wa.me/?text=" + encodeURIComponent(inviteText()), "_blank", "noopener");
+  $("#inv-share").onclick = ()=>{ const t = inviteText(); navigator.share ? navigator.share({text:t}).catch(()=>{}) : copyText(t, $("#inv-msg")); };
+  $("#inv-cal").onclick = ()=>{
+    const date = $("#inv-date").value, time = $("#inv-time").value || "20:00";
+    if(!date) return $("#inv-msg").textContent = "בחר תאריך.";
+    const start = date.replace(/-/g,"") + "T" + time.replace(":","") + "00";
+    const endD = new Date(`${date}T${time}`); endD.setHours(endD.getHours()+1);
+    const end = ymd(endD).replace(/-/g,"") + "T" + String(endD.getHours()).padStart(2,"0") + String(endD.getMinutes()).padStart(2,"0") + "00";
+    const clean = s => s.replace(/[\\;,]/g, m=>"\\"+m).replace(/\n/g,"\\n");
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//chavruta//he","BEGIN:VEVENT",
+      `UID:${Date.now()}@chavruta`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").slice(0,15)}Z`,
+      `DTSTART:${start}`, `DTEND:${end}`, `SUMMARY:${clean("חברותא: " + ($("#inv-what").value.trim() || "לימוד"))}`,
+      $("#inv-where").value.trim() ? `LOCATION:${clean($("#inv-where").value.trim())}` : "", `DESCRIPTION:${clean(siteUrl())}`,
+      "END:VEVENT","END:VCALENDAR"].filter(Boolean).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], {type:"text/calendar"})); a.download = "chavruta.ics"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    $("#inv-msg").textContent = "נוצר קובץ יומן. פתח אותו כדי להוסיף את הלימוד ליומן שלך.";
+  };
+  // 3. study with the AI as a chavruta
+  $("#ai-chv").onclick = ()=>{ setContext(null); setMode("chavruta"); showTab("chat"); $("#q").focus(); };
+  // 4. a beit midrash on the map, near the city chosen for the zmanim
+  const place = store("chv-place");
+  $("#bm-map").href = place && place.name !== "המיקום שלי"
+    ? "https://www.google.com/maps/search/" + encodeURIComponent("בית מדרש " + place.name)
+    : place ? `https://www.google.com/maps/search/${encodeURIComponent("בית מדרש")}/@${place.lat},${place.lon},14z`
+    : "https://www.google.com/maps/search/" + encodeURIComponent("בית מדרש");
+  renderPlan();
+}
+// 2. a shared study plan: the same plan for both friends through a link; each keeps his own progress
+const PLANS = [
+  {id:"avot", title:"פרקי אבות", book:"Pirkei Avot", units:6, per:1, unit:"פרק"},
+  {id:"tehillim", title:"ספר תהלים", book:"Psalms", units:150, per:5, unit:"מזמורים"},
+  {id:"berakhot", title:"משנה ברכות", book:"Mishnah Berakhot", units:9, per:1, unit:"פרק"},
+  {id:"bereshit", title:"ספר בראשית", book:"Genesis", units:50, per:1, unit:"פרק"},
+  {id:"yonah", title:"ספר יונה", book:"Jonah", units:4, per:1, unit:"פרק"},
+  {id:"mesilat", title:"מסילת ישרים", book:"Mesillat Yesharim", units:26, per:1, unit:"פרק"}
+];
+function planDay(p, k){                                   // what is learned on day k (0-based)
+  const a = k*p.per + 1, b = Math.min(p.units, (k+1)*p.per);
+  return { ref: a===b ? `${p.book} ${a}` : `${p.book} ${a}-${b}`, he: a===b ? `${p.unit} ${heb(a)}` : `${p.unit} ${heb(a)}–${heb(b)}` };
+}
+function renderPlan(){
+  const box = $("#plan-body"), cur = store("chv-plan"), p = cur && PLANS.find(x=>x.id===cur.id);
+  if(!p){
+    box.innerHTML = `<p class="note">בחר תוכנית. אחר כך שלח לחבר קישור, ושניכם תלמדו את אותו הקטע בכל יום.</p>
+      <div class="plan-pick">${PLANS.map(x=>`<button type="button" data-plan="${x.id}"><b>${x.title}</b><span>${Math.ceil(x.units/x.per)} ימים · ${x.per>1?`${x.per} ${x.unit} ביום`:`${x.unit} ביום`}</span></button>`).join("")}</div>`;
+    box.querySelectorAll("[data-plan]").forEach(b=>b.onclick=()=>{ store("chv-plan", {id:b.dataset.plan, start:ymd(new Date())}); renderPlan(); });
+    return;
+  }
+  const days = Math.ceil(p.units/p.per), doneKey = `chv-plan-done-${p.id}-${cur.start}`, done = new Set(store(doneKey) || []);
+  const today = Math.floor((new Date(ymd(new Date())+"T12:00") - new Date(cur.start+"T12:00")) / 864e5);
+  const k = Math.max(0, Math.min(days-1, today)), d = planDay(p, k), link = `${siteUrl()}#plan=${p.id}.${cur.start}`;
+  const ended = today >= days;
+  box.innerHTML = `<p><b>${p.title}</b> · ${ended ? "התוכנית הסתיימה." : `היום ה-${k+1} מתוך ${days}: <b>${d.he}</b>`} · השלמת ${done.size} מתוך ${days}</p>
+    <div class="hrow"><button class="btn primary" type="button" id="plan-go">${ended ? "פתח את היום האחרון" : "ללמוד את היום"}</button>
+      <button class="btn" type="button" id="plan-wa">שליחה לחבר בוואטסאפ</button><button class="btn" type="button" id="plan-copy">העתקת קישור</button>
+      <button class="btn" type="button" id="plan-reset">תוכנית אחרת</button></div>
+    <div class="plan-days" role="group" aria-label="ימים שהשלמת">${Array.from({length:days},(_,i)=>`<label class="${i===k&&!ended?"today":""}" title="${planDay(p,i).he}"><input type="checkbox" data-day="${i}" ${done.has(i)?"checked":""} aria-label="יום ${i+1}: ${planDay(p,i).he}">${heb(i+1)}</label>`).join("")}</div>
+    <p class="note" id="plan-msg"></p>`;
+  $("#plan-go").onclick = ()=>openRef(d.ref);
+  $("#plan-wa").onclick = ()=>window.open("https://wa.me/?text=" + encodeURIComponent(`בוא נלמד יחד ${p.title}, כל יום קצת. התוכנית שלנו כאן:\n${link}`), "_blank", "noopener");
+  $("#plan-copy").onclick = ()=>copyText(link, $("#plan-msg"));
+  $("#plan-reset").onclick = ()=>{ store("chv-plan", null); renderPlan(); };
+  box.querySelectorAll("[data-day]").forEach(c=>c.onchange=()=>{ c.checked ? done.add(+c.dataset.day) : done.delete(+c.dataset.day); store(doneKey, [...done]); renderPlan(); });
+}
+// opening a shared plan link (#plan=tehillim.2026-10-16) starts the same plan, on the same dates
+(function(){
+  const m = location.hash.match(/^#plan=([a-z]+)\.(\d{4}-\d{2}-\d{2})$/);
+  if(m && PLANS.some(p=>p.id===m[1])){ store("chv-plan", {id:m[1], start:m[2]}); history.replaceState(null, "", siteUrl()); setTimeout(()=>showTab("chv")); }
+})();
 (async()=>{
   if(!window.claude){
     chvSoon();

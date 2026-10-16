@@ -1,15 +1,21 @@
 {
+  "id": "./chavruta.html",
   "name": "חברותא: לימוד תורה",
   "short_name": "חברותא",
-  "description": "ארון הספרים, לימוד עם AI, סידור וזמני היום",
+  "description": "ארון הספרים, פירושים, סידור, זמני היום ולימוד בחברותא",
   "lang": "he",
   "dir": "rtl",
   "start_url": "./chavruta.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#101B3A",
   "theme_color": "#101B3A",
+  "categories": ["education", "books", "lifestyle"],
   "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

@@ -1,8 +1,9 @@
 /* חברותא: service worker.
    The app page itself: from the network when there is one (always the latest version), otherwise the
    saved copy. Everything else (Sefaria, Hebcal, the API) always goes to the network and is never cached here. */
-const CACHE = "chavruta-v1";
-const SHELL = ["./chavruta.html", "./manifest.webmanifest", "./icon.svg"];
+const CACHE = "chavruta-v2";
+const SHELL = ["./chavruta.html", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./about.html",
+               "./terms.html", "./privacy.html", "./accessibility.html"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
